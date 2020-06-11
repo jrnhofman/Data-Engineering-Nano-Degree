@@ -34,7 +34,7 @@ def process_song_file(cur, filepath):
     cur.execute(artist_table_insert, artist_data)
     
 
-def psql_insert_copy(table, cur, df, conflict_col):
+def psql_insert_copy(table, cur, df, conflict_col, conflict_action="DO NOTHING"):
     """
     Execute SQL statement inserting data
 
@@ -58,13 +58,13 @@ def psql_insert_copy(table, cur, df, conflict_col):
         CREATE TABLE temp_{table}(LIKE {table});
         COPY temp_{table} FROM STDIN WITH CSV;
 
-        INSERT INTO {table}({columns})
+        INSERT INTO {table} AS t ({columns}) 
         SELECT *
         FROM temp_{table} ON conflict ({conflict_col}) 
-        DO NOTHING;
+        {conflict_action};
 
         DROP TABLE temp_{table};
-        """.format(conflict_col=conflict_col, table=table, columns=columns)
+        """.format(conflict_col=conflict_col, table=table, columns=columns, conflict_action=conflict_action)
     cur.copy_expert(sql=sql, file=s_buf)
 
 
@@ -100,7 +100,17 @@ def process_log_file(cur, filepath):
     user_df = df[['userId', 'firstName', 'lastName', 'gender', 'level']]
     user_df = user_df.rename(axis=1,mapper={'userId':'user_id', 'firstName':'first_name', 'lastName':'last_name'})
     
-    psql_insert_copy('users', cur, user_df, 'user_id')
+    # sets the user level if the current level is 'free' to allow for upgrades from 'free' to 'paid'
+    # we have to drop exact duplicates as this is a requirement for updates on conflict in PostgreSQL
+    # we want to keep the user_id with a level which is the 'last' in alphabetical order, i.e. if we have
+    # a user with both levels 'free' and 'paid' we want to take the 'paid' version
+    user_df = user_df.sort_values(by=['user_id', 'level']).drop_duplicates(subset='user_id', keep='last')
+    user_conflict_action = """DO UPDATE SET level = EXCLUDED.level WHERE t.level='free'"""
+    
+    for i, row in user_df.iterrows():
+        cur.execute(user_table_insert, row)
+    
+    #psql_insert_copy('users', cur, user_df, 'user_id', user_conflict_action)
     
     # get artistid, songid for all songs and artists
     cur.execute(song_select_all)    

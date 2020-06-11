@@ -26,13 +26,13 @@ def process_song_file(cur, filepath):
     # we use single inserts
     song_data = list(df[['song_id', 'title', 'artist_id', 'year', 'duration']].values[0])
     cur.execute(song_table_insert, song_data)
-    
+
     # insert artist record, since it's single values at a time
     # we use single inserts
     artist_data = list(df[['artist_id', 'artist_name', 'artist_location'
                            , 'artist_latitude', 'artist_longitude']].values[0])
     cur.execute(artist_table_insert, artist_data)
-    
+
 
 def psql_insert_copy(table, cur, df, conflict_col, conflict_action="DO NOTHING"):
     """
@@ -42,8 +42,8 @@ def psql_insert_copy(table, cur, df, conflict_col, conflict_action="DO NOTHING")
     ----------
     table : pandas.io.sql.SQLTable
     cur : cursor
-    df : Input dataframe 
-    conflict_col : column which should be used to detect conflicts in 
+    df : Input dataframe
+    conflict_col : column which should be used to detect conflicts in
     insertion
     """
 
@@ -58,9 +58,9 @@ def psql_insert_copy(table, cur, df, conflict_col, conflict_action="DO NOTHING")
         CREATE TABLE temp_{table}(LIKE {table});
         COPY temp_{table} FROM STDIN WITH CSV;
 
-        INSERT INTO {table} AS t ({columns}) 
+        INSERT INTO {table} AS t ({columns})
         SELECT *
-        FROM temp_{table} ON conflict ({conflict_col}) 
+        FROM temp_{table} ON conflict ({conflict_col})
         {conflict_action};
 
         DROP TABLE temp_{table};
@@ -88,37 +88,34 @@ def process_log_file(cur, filepath):
 
     # convert timestamp column to datetime
     t = pd.to_datetime(df.ts, unit='ms')
-    
+
     # insert time data records
     time_data = [t.values, t.dt.hour, t.dt.day, t.dt.weekofyear, t.dt.month, t.dt.year, t.dt.weekday]
     column_labels = ['start_time', 'hour', 'day', 'week', 'month', 'year', 'weekday']
     time_df = pd.DataFrame({k:v for k,v in zip(column_labels,time_data)})
-    
+
     psql_insert_copy('time', cur, time_df, 'start_time')
 
     # load user table
     user_df = df[['userId', 'firstName', 'lastName', 'gender', 'level']]
     user_df = user_df.rename(axis=1,mapper={'userId':'user_id', 'firstName':'first_name', 'lastName':'last_name'})
-    
+
     # sets the user level if the current level is 'free' to allow for upgrades from 'free' to 'paid'
     # we have to drop exact duplicates as this is a requirement for updates on conflict in PostgreSQL
     # we want to keep the user_id with a level which is the 'last' in alphabetical order, i.e. if we have
     # a user with both levels 'free' and 'paid' we want to take the 'paid' version
     user_df = user_df.sort_values(by=['user_id', 'level']).drop_duplicates(subset='user_id', keep='last')
     user_conflict_action = """DO UPDATE SET level = EXCLUDED.level WHERE t.level='free'"""
-    
-    for i, row in user_df.iterrows():
-        cur.execute(user_table_insert, row)
-    
-    #psql_insert_copy('users', cur, user_df, 'user_id', user_conflict_action)
-    
+
+    psql_insert_copy('users', cur, user_df, 'user_id', user_conflict_action)
+
     # get artistid, songid for all songs and artists
-    cur.execute(song_select_all)    
+    cur.execute(song_select_all)
     all_songs = cur.fetchall()
-    
+
     all_songs_df = pd.DataFrame(all_songs, columns=['song', 'artist', 'length', 'song_id', 'artist_id'])
-    
-    # merge the log DF on song artist and length, all but one value 
+
+    # merge the log DF on song artist and length, all but one value
     # of the left join will be NaN on the right side
     songplay_df = df.merge(all_songs_df, on=['song', 'artist', 'length'], how='left')
 
@@ -128,7 +125,7 @@ def process_log_file(cur, filepath):
     old_column_names = ['index', 'ts', 'userId', 'level', 'song_id', 'artist_id', 'sessionId', 'location', 'userAgent']
     columns = ['songplay_id', 'start_time', 'user_id', 'level', 'song_id', 'artist_id', 'session_id', 'location', 'user_agent']
     songplay_df = songplay_df.rename(mapper=dict(zip(old_column_names,columns)), axis=1)[columns]
-    
+
     psql_insert_copy('songplays', cur, songplay_df, 'songplay_id')
 
 

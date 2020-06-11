@@ -85,8 +85,12 @@ artist_table_insert = ("""
 """)
 
 
-########### DEPRECATED #####################
-# We use bulk insert with COPY statments in etl.py
+########### WARNING ################################
+# we don't use the below code but instead use   ####
+# bulk insert with COPY statments in etl.py     ####
+# through calling psql_insert_copy in etl.py    ####
+####################################################
+
 time_table_insert = ("""
     INSERT INTO time (start_time, hour, day, week, month, year, weekday) \
     VALUES (%s, %s, %s, %s, %s, %s, %s)
@@ -97,7 +101,7 @@ time_table_insert = ("""
 songplay_table_insert = ("""
     INSERT INTO songplays (songplay_id, start_time, user_id, level, song_id, artist_id, session_id, location, user_agent) \
     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-    ON CONFLICT (songplay_id) 
+    ON CONFLICT (songplay_id)
     DO NOTHING;
 """)
 
@@ -117,7 +121,7 @@ user_table_insert = ("""
 # a query once and merge data in Pandas
 # in ETL.py to be able to do bulk inserts
 song_select = ("""
-    SELECT 
+    SELECT
         s.song_id
         , s.artist_id
     FROM songs s

@@ -14,6 +14,9 @@ os.environ['AWS_SECRET_ACCESS_KEY']=config['AWS_SECRET_ACCESS_KEY']
 
 
 def create_spark_session():
+    """
+    Creates a spark session which is passed to the other functions.
+    """
     spark = SparkSession \
         .builder \
         .config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:2.7.0") \
@@ -22,6 +25,12 @@ def create_spark_session():
 
 
 def process_song_data(spark, input_data, output_data):
+    """"
+    This function processes song JSON files found in S3 input_data
+    and creates artist and song tables and writes them to parquet
+    in the output_data S3 location.
+    """
+
     # get filepath to song data file
     song_data = os.path.join(input_data, 'song_data/*/*/*/*.json')
 
@@ -42,6 +51,13 @@ def process_song_data(spark, input_data, output_data):
 
 
 def process_log_data(spark, input_data, output_data):
+    """"
+    This function processes events JSON files found in S3 input_data
+    and creates time, user and songplay tables
+    and writes them to parquet
+    in the output_data S3 location.
+    """
+
     # get filepath to log data file
     log_data = os.path.join(input_data, 'log-data/*/*/*.json')
 
@@ -94,13 +110,18 @@ def process_log_data(spark, input_data, output_data):
     """).drop_duplicates()
 
     # write time table to parquet files partitioned by year and month
-    time_table.write.mode('overwrite').parquet(os.path.join(output_data, 'time_table.parquet'))
+    (time_table
+        .write
+        .partitionBy(['year', 'month'])
+        .mode('overwrite')
+        .parquet(os.path.join(output_data, 'time_table.parquet')))
 
     # read in song data to use for songplays table
     song_df = spark.read.parquet(os.path.join(output_data, 'song_data.parquet'))
     artist_df = spark.read.parquet(os.path.join(output_data, 'artist_data.parquet'))
     song_df.registerTempTable('songs')
     artist_df.registerTempTable('artists')
+    time_table.registerTempTable('time_table')
 
     # extract columns from joined song and log datasets to create songplays table
     songplays_table = spark.sql("""
@@ -114,6 +135,8 @@ def process_log_data(spark, input_data, output_data):
             , se.sessionId as session_id
             , se.location
             , se.userAgent as user_agent
+            , t.year
+            , t.month
         FROM events se
         JOIN artists a
             ON se.artist = a.artist_name
@@ -121,12 +144,13 @@ def process_log_data(spark, input_data, output_data):
             ON se.song = ss.title
             AND a.artist_id = ss.artist_id
             AND se.length = ss.duration
+        JOIN time_table t ON se.datetime = t.ts
         WHERE se.userId IS NOT NULL
         GROUP BY 1,2,4,5,6,7,8
     """)
 
     # write songplays table to parquet files partitioned by year and month
-    songplays_table.write.mode('overwrite').parquet(os.path.join(output_data, 'songplays_table.parquet'))
+    songplays_table.write.partitionBy(['year', 'month']).mode('overwrite').parquet(os.path.join(output_data, 'songplays_table.parquet'))
 
 
 def main():

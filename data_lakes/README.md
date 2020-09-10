@@ -1,4 +1,4 @@
-# Project 3: Data Warehouse in AWS
+# Project 4: Data Lakes
 
 Author: Jeroen Hofman
 Updated: June 29, 2020

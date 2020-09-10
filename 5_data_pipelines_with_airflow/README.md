@@ -3,6 +3,9 @@
 Author: Jeroen Hofman
 Updated: August 30, 2020
 
+### Technologies:
+Airflow, Python, SQL
+
 ## Brief description:
 Following instructions we built a star schema for songplay data from Sparkify. Starschemas are useful since we have a fact table (songplays) and then can get more detailed info using dimension tables by doing a series of simple joins. As such, these type of schemas are useful for querying analytical data (see below).
 

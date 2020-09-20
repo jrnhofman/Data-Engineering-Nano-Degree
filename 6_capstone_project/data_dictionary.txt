@@ -1,0 +1,56 @@
+Data dictionary
+
+Format for columns:
+{COLUMN_NAME} : {DESCRIPTION}
+Format for table:
+Table: {TABLE_NAME} : {DESCRIPTION}
+: {SOURCE}
+
+Table: immigrant : dimension table containing basic identifiers to join on other tables
+(https://travel.trade.gov/research/reports/i94/historical/2016.html)
+immigrant_id: Unique NON-NULL ID assigned to each record of an immigrant
+port: Arrival port over air
+state: State (US) in which the migrant arrived
+arrival_date: Date on which the migrant arrived
+
+Table: immigrant_stats : Fact table providing facts about the immigrant
+(https://travel.trade.gov/research/reports/i94/historical/2016.html)
+immigrant_id: Unique NON-NULL ID assigned to each record of an immigrant
+immigration_id: ID assigned by immigration office
+gender: Gender of immigrant, male or female, if unknown 'X'
+age: Age of immigrant in years, -1 if unknown
+origin_country: Country of origin of immigrant
+visa_type: Visa code, 'Unknown' if unknown
+visitor_type: Reason for visit, either 'business', 'travel' or 'leisure', 'Unknown' if unknown
+
+Table: city_population : Fact table describing basic statistics of population of city
+(https://public.opendatasoft.com/explore/dataset/us-cities-demographics/export/)
+city: City name
+port: Airport of city
+state: State of city
+male_population: Male population
+female_population: Female population
+total_population: Total population, male + female
+foreign_born: Population not born in US
+
+Table: city_demographics : Fact table describing basic statistics of race composition of city
+(https://public.opendatasoft.com/explore/dataset/us-cities-demographics/export/)
+city: City name
+port: Airport of city
+state: State of city
+race: Race-group
+n_persons: Number of people in race-group
+
+Table: arrival_info : Fact table containing airport and airline information
+(https://travel.trade.gov/research/reports/i94/historical/2016.html)
+immigrant_id: Unique NON-NULL ID assigned to each record of an immigrant
+port: Airport of city
+port_type: always 'Air' since we filter immigrant on airport arrivals only
+airline_code: Code if known, else 'Unknown'
+airline_flight_number: Code if known, else 'Unknown'
+
+Table: arrival_date : Fact table breaking down arrival date format
+(https://travel.trade.gov/research/reports/i94/historical/2016.html)
+arrival_date: Date of arrival
+immigration_year: Year of arrival from date
+immigration_month: Month of arrival from date

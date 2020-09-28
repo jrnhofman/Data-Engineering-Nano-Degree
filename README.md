@@ -5,32 +5,32 @@ So far this contains a few projects, each with a different implementation on top
 
 ## Project 1: [Data Modeling with PostgreSQL](https://github.com/jrnhofman/Data-Engineering-Nano-Degree/tree/master/1_data_modeling_with_postgres)
 
-<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/postgresql.png" style="height: 25%; width: 25%; max-width: 200px" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/postgresql.png" width="200"/></p>
 
 Developed a relational database using PostgreSQL to model user activity data for a music streaming app.
 
 ## Project 2: [Data Modeling with Apache Cassandra](https://github.com/jrnhofman/Data-Engineering-Nano-Degree/tree/master/2_data_modeling_with_apache_cassandra)
 
-<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/cassandra.png" style="height: 25%; width: 25%; max-width: 200px" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/cassandra.png" width="200" /></p>
 
 Developed a NoSQL database using Apache Cassandra based on a star schema. 
 
 ## Project 3: [Data Warehouse with S3 and Redshift](https://github.com/jrnhofman/Data-Engineering-Nano-Degree/tree/master/3_data_warehouse_with_s3_and_redshift)
 
-<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/redshift.png" style="height: 25%; width: 25%; max-width: 200px" /></p>
-<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/s3.png" style="height: 25%; width: 25%; max-width: 200px" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/redshift.png" width="200" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/s3.png" width="200" /></p>
 
 Created a database warehouse in Amazon Redshift with raw data in S3.
 
 ## Project 4: [Data Lakes with Spark](https://github.com/jrnhofman/Data-Engineering-Nano-Degree/tree/master/4_data_lakes_with_spark)
 
-<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/spark.png" style="height: 25%; width: 25%; max-width: 200px" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/spark.png" width="200" /></p>
 
 ETL pipelines at scale by processing data on S3 through Spark back to S3.
 
 ## Project 5: [Data Pipelines with Airflow](https://github.com/jrnhofman/Data-Engineering-Nano-Degree/tree/master/5_data_pipelines_with_airflow)
 
-<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/airflow.png" style="height: 25%; width: 25%; max-width: 200px" /></p>
+<p align="center"><img src="https://raw.githubusercontent.com/jrnhofman/Data-Engineering-Nano-Degree/master/images/airflow.png" width="200" /></p>
 
 Use Airflow to build a data pipeline from S3 to staging tables to a data warehouse in Redshift.
 
